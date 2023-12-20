@@ -13,6 +13,7 @@ I wanted to show an alternative solution that we can discuss its benefits and dr
 
 ## FundaSorterApi's approach to this problem
 The current data storage solution is a cache database which is Redis
+
 Reasons;
 - Faster response time (especially on repeatedly requested data)
 - Easier modeling since it's using general data structures
@@ -36,11 +37,11 @@ This controller has four endpoints
   It will provide the parameters to the HttpClient which will construct a URL string to consume and then start retrieving from FundaAPI
   There will be 600 ms of waiting time between each request to FundaAPI
   Then it will refine data into SortedHash in Redis. makelaarNaam will be key, number of elements related to that makelaar will be value
-- [HttpPost("CacheInDataFromFunda-Experimental")]
+- #### [HttpPost("CacheInDataFromFunda-Experimental")]
   
   This method takes the same parameters as RetrieveAllRealEstatesFromFunda only difference, it stores all the data in the cache db for future use
   My ultimate goal was to refine data out of this data but there was not enough time. I just left it here to show you the thought process.
-- [HttpGet("GetTopTenMakelaars")]
+- #### [HttpGet("GetTopTenMakelaars")]
   
   This method will return the latest results of the RetrieveAllRealEstatesFromFunda method in descending order.
 
@@ -73,6 +74,12 @@ As stated in the name this class is obsolete, I am fully aware that I shouldn't 
 My first thinking was to collect all the data sort it then store it in a DB. That's why I've started this implementation. After I've found that Redis provides
 **SortedHash**, this class became obsolete.
 
+## Testability
+- Current implementation supports end-to-end to testing.
+- Full coverage is not possible due to obsolete and unfinished methods
+- Full coverage with unit test can be possible if connections is converted to interfaces
+  This will support mocking the external connections.
+
 ## Improvements to make
 - ***The most important and unfinished improvement is to consume the FundaAPI once and then use the cached data. Only then does this choice of data storage make sense***.
 - All of the clients/connectors should collect connection strings from the configuration
@@ -80,6 +87,7 @@ My first thinking was to collect all the data sort it then store it in a DB. Tha
 - Logging must be spread all over the API
 - Null checking for all nullable references should be in place
 - All endpoints should be configured to return correct status codes
+
 
 ## Usage
 Using Visual Studio is highly recommended as it will allow Swagger to test this API.
