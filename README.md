@@ -1,7 +1,7 @@
 # FundaSorterApi [WIP]
 
 ## General approach to this problem
-I think it's pretty obvious that this API should use SQL database for the following reasons:
+I think the likelyhood solution is; choosing SQL based database for the following reasons:
 - Easy to group by fields (by "MakelaarNaam")
 - Easy to filter (by the ones that contain "tuin")
 - Guaranteed redundancy (occurrence of the same entry can be easily handled)
