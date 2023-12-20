@@ -8,7 +8,7 @@ I think the likelyhood solution is; choosing SQL based database for the followin
 - Handy Sorting features
 - Having the right queries would minimize API functionality
 
-This is why I didn't choose SQL solution because it's already a no-brainer solution.
+This is why I didn't choose SQL solution because it's already an ideal solution.
 I wanted to show an alternative solution that we can discuss its benefits and drawbacks.
 
 ## FundaSorterApi's approach to this problem
