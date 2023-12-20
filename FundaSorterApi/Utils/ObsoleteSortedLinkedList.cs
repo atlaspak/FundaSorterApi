@@ -7,7 +7,7 @@ namespace FundaSorterApi.Utils
     //worst case insert complexity is O(1)
     //worst case arithmetical addition complexity is O(N)
     //That's why this algorithm efficient when incremental or decremental is 1 (eg. FundaSorterApi)
-    public class SortedLinkedList<T>
+    public class ObsoleteSortedLinkedList<T>
     {
         private struct ElementWithCount
         {
@@ -22,7 +22,7 @@ namespace FundaSorterApi.Utils
         }
         private Dictionary<T, LinkedListNode<ElementWithCount>> elementMap;
         private LinkedList<ElementWithCount> sortedLList;
-        public SortedLinkedList()
+        public ObsoleteSortedLinkedList()
         {
             elementMap = new Dictionary<T, LinkedListNode<ElementWithCount >>();
             sortedLList = new LinkedList<ElementWithCount>();

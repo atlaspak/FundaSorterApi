@@ -1,10 +1,10 @@
 ﻿using StackExchange.Redis;
 
-public class RedisConnectorHelper
+public class CacheConnection
 {
     private static Lazy<ConnectionMultiplexer> lazyConnection;
 
-    static RedisConnectorHelper()
+    static CacheConnection()
     {
         ConfigurationOptions options = new ConfigurationOptions
         {

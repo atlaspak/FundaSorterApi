@@ -16,7 +16,7 @@ namespace FundaSorterApi.Controllers
         public ObsoleteEstateCollectorController(ILogger<ObsoleteEstateCollectorController> logger)
         {
             _logger = logger;
-            cacheDB = RedisConnectorHelper.Connection.GetDatabase();
+            cacheDB = CacheConnection.Connection.GetDatabase();
             
         }
 

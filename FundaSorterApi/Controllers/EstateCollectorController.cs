@@ -18,7 +18,7 @@ namespace FundaSorterApi.Controllers
         public EstateCollectorController(ILogger<EstateCollectorController> logger)
         {
             _logger = logger;
-            _cacheDB = RedisConnectorHelper.Connection.GetDatabase();
+            _cacheDB = CacheConnection.Connection.GetDatabase();
             _logger.LogInformation("EstateCollectorController instantiated at {Time}", DateTime.Now);
         }
 
