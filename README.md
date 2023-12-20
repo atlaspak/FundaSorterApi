@@ -17,7 +17,7 @@ The current data storage solution is a cache database which is Redis
 Reasons;
 - Faster response time (especially on repeatedly requested data)
 - Easier modeling since it's using general data structures
-- Optimation of peak time queries
+- Optimization of peak time queries
 
 ## Implementation Details
 The current implementation contains 3 different controllers for this API
