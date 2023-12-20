@@ -27,21 +27,24 @@ The current implementation contains 3 different controllers for this API
 
 ### EstateCollectorController
 This controller has four endpoints
-- #### HttpPost("RetrieveRealEstatesFromMessage")
+- #### HttpPost("RetrieveRealEstatesFromMessage"):
    I have added this function to test it before consuming the FundaApi, it's allowing you to send the data in the message body
-- #### HttpPost("RetrieveAllRealEstatesFromFunda")
+  
+- #### HttpPost("RetrieveAllRealEstatesFromFunda"):
    This method consumes from FundaApi and takes two parameters;
    - cityName  (eg. "amsterdam")
    - searchFor (eg. "tuin")
 
-  It will provide the parameters to the HttpClient which will construct a URL string to consume and then start retrieving from FundaAPI
-  There will be 600 ms of waiting time between each request to FundaAPI
-  Then it will refine data into SortedHash in Redis. makelaarNaam will be key, number of elements related to that makelaar will be value
-- #### [HttpPost("CacheInDataFromFunda-Experimental")]
+  The method will handover these parameters to the FundaAPI-HttpClient which will construct a URL string to consume. Then it will start retrieving from FundaAPI.
+  There will be 600 ms of waiting time between each request to FundaAPI.
+  Then it will refine data into SortedHash in Redis. "makelaarNaam" will be key and property count belong to that makelaar will be value.
+
+- #### [HttpPost("CacheInDataFromFunda-Experimental")]:
   
   This method takes the same parameters as RetrieveAllRealEstatesFromFunda only difference, it stores all the data in the cache db for future use
   My ultimate goal was to refine data out of this data but there was not enough time. I just left it here to show you the thought process.
-- #### [HttpGet("GetTopTenMakelaars")]
+  
+- #### [HttpGet("GetTopTenMakelaars")]:
   
   This method will return the latest results of the RetrieveAllRealEstatesFromFunda method in descending order.
 
