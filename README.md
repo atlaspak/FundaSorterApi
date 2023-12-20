@@ -12,7 +12,7 @@ This is why I didn't choose SQL solution because it's already a no-brainer solut
 I wanted to show an alternative solution that we can discuss its benefits and drawbacks.
 
 ## FundaSorterApi's approach to this problem
-The current data storage solution is a cache database which is Redis
+The current data storage solution is a cache database which is Redis.
 
 Reasons;
 - Faster response time (especially on repeatedly requested data)
@@ -28,7 +28,7 @@ The current implementation contains 3 different controllers for this API
 ### EstateCollectorController
 This controller has four endpoints
 - #### HttpPost("RetrieveRealEstatesFromMessage"):
-   I have added this function to test it before consuming the FundaApi, it's allowing you to send the data in the message body
+   I have added this function to test it before consuming the FundaApi, it's allowing you to send the data in the message body.
   
 - #### HttpPost("RetrieveAllRealEstatesFromFunda"):
    This method consumes from FundaApi and takes two parameters;
@@ -41,8 +41,8 @@ This controller has four endpoints
 
 - #### [HttpPost("CacheInDataFromFunda-Experimental")]:
   
-  This method takes the same parameters as RetrieveAllRealEstatesFromFunda only difference, it stores all the data in the cache db for future use
-  My ultimate goal was to refine data out of this data but there was not enough time. I just left it here to show you the thought process.
+  This method takes the same parameters as RetrieveAllRealEstatesFromFunda. Only difference is, it stores all the data in the cache db for future use.
+  My ultimate goal was to refine sorted-data out of this data but there was not enough time. I just left it here to show you the as draft.
   
 - #### [HttpGet("GetTopTenMakelaars")]:
   
@@ -58,7 +58,7 @@ It's nice to have this controller during the development time to test other feat
 
 ## Other features
 ### CacheConnection
-This file contains connection details and a connector to the Redis database
+This file contains connection details and a connector to the Redis database.
 
 ***Note: In a real-life scenario configuration should be retrieved from configuration files and controllers should access this via dependency injection.***
 
@@ -79,17 +79,17 @@ My first thinking was to collect all the data sort it then store it in a DB. Tha
 
 ## Testability
 - Current implementation supports end-to-end to testing.
-- Full coverage is not possible due to obsolete and unfinished methods
-- Full coverage with unit test can be possible if connections is converted to interfaces
+- Full coverage is not possible due to obsolete and unfinished methods.
+- Full coverage with unit test can be possible if connections is converted to interfaces.
   This will support mocking the external connections.
 
 ## Improvements to make
 - ***The most important and unfinished improvement is to consume the FundaAPI once and then use the cached data. Only then does this choice of data storage make sense***.
-- All of the clients/connectors should collect connection strings from the configuration
+- All of the clients/connectors should collect connection strings from the configuration.
 - All of the clients/connectors should be included in connectors with dependency injection.
-- Logging must be spread all over the API
-- Null checking for all nullable references should be in place
-- All endpoints should be configured to return correct status codes
+- Logging must be spread all over the API.
+- Null checking for all nullable references should be in place.
+- All endpoints should be configured to return correct status codes.
 
 
 ## Usage
