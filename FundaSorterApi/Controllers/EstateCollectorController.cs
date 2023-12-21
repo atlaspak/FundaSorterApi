@@ -1,10 +1,9 @@
-using Microsoft.AspNetCore.Mvc;
-using StackExchange.Redis;
 using FundaSorterApi.Client;
-using FundaSorterApi.Models.Response;
 using FundaSorterApi.Models.Requests;
-using NRedisStack.RedisStackCommands;
-using System.Text.Json;
+using FundaSorterApi.Models.Response;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using StackExchange.Redis;
 
 namespace FundaSorterApi.Controllers
 {
@@ -22,6 +21,11 @@ namespace FundaSorterApi.Controllers
             _logger.LogInformation("EstateCollectorController instantiated at {Time}", DateTime.Now);
         }
 
+        /// <summary>
+        /// This function requires user to provide KoopResponseDTO in the function body.
+        /// </summary>
+        /// <param name="koopResponse">KoopResponseDTO is orginally defined by FundaAPI</param>
+        /// <returns>Number of entries recorded to DB</returns>
         [HttpPost("RetrieveRealEstatesFromMessage")]
         public async Task<IActionResult> retrieveEstatesFromMessage([FromBody] KoopResponseDTO koopResponse)
         {
@@ -42,44 +46,15 @@ namespace FundaSorterApi.Controllers
             return Ok(entryCount);
         }
 
+        /// <summary>
+        /// Consumes FundaApi with the given parameters
+        /// </summary>
+        /// <param name="filterRequest">City and feature of a real estate</param>
+        /// <returns>Number of entries recorded to DB</returns>
         [HttpPost("RetrieveAllRealEstatesFromFunda")]
-        public async Task<IActionResult> retrieveAllEstatesFromFunda([FromBody]FilterRequestDTO filterRequest)
+        public async Task<IActionResult> retrieveAllEstatesFromFunda([FromBody] FilterRequestDTO filterRequest)
         {
             PropertyCollectorClient client = new PropertyCollectorClient();
-            long entryCount = 0;
-            int currentPage = 1;
-            int totalPages = 1;
-            try
-            {
-                KoopResponseDTO koopResponse;
-                while (totalPages >= currentPage)
-                {
-
-                    koopResponse = await PropertyCollectorClient
-                        .fethPageAsync(currentPage,filterRequest.CityName, filterRequest.SearchFor);
-                    if (koopResponse.Paging != null)
-                    {
-                        totalPages = koopResponse.Paging.AantalPaginas;
-                        currentPage = koopResponse.Paging.HuidigePagina + 1;
-                    }
-                    
-                    entryCount += await populateSortedCityObjects(koopResponse);
-                } 
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError("Error occurred in retrieveAllEstatesFromFunda exception:" +
-                    " {0} at {Time}", ex.Message, DateTime.Now);
-                return StatusCode(500, "Internal Server Error");
-            }
-            _logger.LogInformation("retrieveAllEstatesFromFunda retrieved with respect to" +
-                " filterRequest(TODO: give object detail) at {Time}", DateTime.Now);
-            return Ok(entryCount);
-        }
-
-        [HttpPost("CacheInDataFromFunda-Experimental")]
-        public async Task<IActionResult> cacheInDataFromFunda([FromBody] FilterRequestDTO filterRequest)
-        {
             long entryCount = 0;
             int currentPage = 1;
             int totalPages = 1;
@@ -94,7 +69,47 @@ namespace FundaSorterApi.Controllers
                     if (koopResponse.Paging != null)
                     {
                         totalPages = koopResponse.Paging.AantalPaginas;
-                        currentPage = koopResponse.Paging.HuidigePagina;
+                        currentPage = koopResponse.Paging.HuidigePagina + 1;
+                    }
+
+                    entryCount += await populateSortedCityObjects(koopResponse);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Error occurred in retrieveAllEstatesFromFunda exception:" +
+                    " {0} at {Time}", ex.Message, DateTime.Now);
+                return StatusCode(500, "Internal Server Error");
+            }
+            _logger.LogInformation("retrieveAllEstatesFromFunda retrieved with respect to" +
+                " filterRequest(TODO: give object detail) at {Time}", DateTime.Now);
+            return Ok(entryCount);
+        }
+
+        /// <summary>
+        /// Caches Funda data in an indexible way
+        /// This way it will be possible to get statistics from different fields
+        /// </summary>
+        /// <param name="filterRequest">City and feature of a real estate</param>
+        /// <returns>Number of entries recorded to DB</returns>
+        [HttpPost("CacheInDataFromFunda")]
+        public async Task<IActionResult> cacheInDataFromFunda([FromBody] FilterRequestDTO filterRequest)
+        {
+            long entryCount = 0;
+            int currentPage = 1;
+            int totalPages = 1;
+            try
+            {
+                KoopResponseDTO koopResponse;
+                while (totalPages >= currentPage)
+                {
+                    //request page by page
+                    koopResponse = await PropertyCollectorClient
+                        .fethPageAsync(currentPage, city: filterRequest.CityName, searchFor: filterRequest.SearchFor);
+                    if (koopResponse.Paging != null)
+                    {
+                        totalPages = koopResponse.Paging.AantalPaginas;
+                        currentPage = koopResponse.Paging.HuidigePagina += 1;
                     }
 
                     entryCount += await populateIntoCache(koopResponse, filterRequest.CityName);
@@ -110,14 +125,19 @@ namespace FundaSorterApi.Controllers
             return Ok(entryCount);
         }
 
+        /// <summary>
+        /// Returns the sorted result of consumed data
+        /// Only capable of returning single statistic
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("GetTopTenMakelaars")]
         public async Task<IActionResult> GetResult()
         {
-            try 
+            try
             {
-                var rawData = await _cacheDB.SortedSetRangeByRankWithScoresAsync("MakelaarsSorted",0, 9, Order.Descending);
+                var rawData = await _cacheDB.SortedSetRangeByRankWithScoresAsync("MakelaarsSorted", 0, 9, Order.Descending);
                 var resultData = new Dictionary<string, int>();
-                foreach(var entry in rawData)
+                foreach (var entry in rawData)
                 {
                     resultData[entry.Element] = (int)entry.Score;
                 }
@@ -131,6 +151,12 @@ namespace FundaSorterApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Records the results in a sorted manner
+        /// Only capable of storing single statistic
+        /// </summary>
+        /// <param name="koopResponse"></param>
+        /// <returns></returns>
         private async Task<int> populateSortedCityObjects(KoopResponseDTO koopResponse)
         {
             int entryCount = 0;
@@ -146,14 +172,30 @@ namespace FundaSorterApi.Controllers
             return entryCount;
         }
 
-        private async Task<int> populateIntoCache(KoopResponseDTO koopResponse, string cityName)
+        /// <summary>
+        /// Caching mechanism; stores the data in an indexed manner to make it searchable
+        /// This gives more power over presenting different statistics
+        /// </summary>
+        /// <param name="koopResponse"></param>
+        /// <param name="cityName"></param>
+        /// <returns></returns>
+        private async Task<long> populateIntoCache(KoopResponseDTO koopResponse, string cityName)
         {
-            int entryCount = 0;
+            long entryCount = 0;
             if (koopResponse != null && koopResponse.Objects != null)
             {
                 foreach (RealEstateDTO property in koopResponse.Objects)
                 {
-                    await _cacheDB.JSON().ArrAppendAsync(property.MakelaarNaam, JsonSerializer.Serialize(property));
+                    CacheRealEstateDTO cacheData = new CacheRealEstateDTO
+                    {
+                        GlobalId = property.GlobalId,
+                        Postcode = property.Postcode,
+                        Koopprijs = property.Koopprijs,
+                        PublicatieDatum = property.PublicatieDatum,
+                        Tagline = property.PromoLabel?.Tagline
+                    };
+                    entryCount +=
+                        await _cacheDB.ListRightPushAsync(property.MakelaarNaam, JsonConvert.SerializeObject(cacheData));
                 }
             }
             _logger.LogInformation("populateIntoCache cached {0} objects at {Time}", entryCount, DateTime.Now);
