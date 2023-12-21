@@ -52,10 +52,6 @@ This controller has four endpoints
 As stated in the name this controller is obsolete, I am fully aware that I shouldn't keep this in the repo.
 Just to demonstrate the thought process.
 
-### DebugController
-This one is a direct backdoor to the data storage. I cannot guarantee its functionality. 
-It's nice to have this controller during the development time to test other features.
-
 ## Other features
 ### CacheConnection
 This file contains connection details and a connector to the Redis database.
