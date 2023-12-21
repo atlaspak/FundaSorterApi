@@ -39,7 +39,7 @@ This controller has four endpoints
   There will be 600 ms of waiting time between each request to FundaAPI.
   Then it will refine data into SortedHash in Redis. "makelaarNaam" will be key and property count belong to that makelaar will be value.
 
-- #### [HttpPost("CacheInDataFromFunda-Experimental")]:
+- #### [HttpPost("CacheInDataFromFunda")]:
   
   This method takes the same parameters as RetrieveAllRealEstatesFromFunda. Only difference is, it stores all the data in the cache db for future use.
   My ultimate goal was to refine sorted-data out of this data but there was not enough time. I just left it here to show you the as draft.
